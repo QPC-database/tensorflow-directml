@@ -118,6 +118,12 @@ def _run_test(
         stderr.seek(0)
         test_output = stdout.read() + stderr.read()
 
+        # Crashes are not common but when they happen, they stop all following
+        # tests from running and don't produce an XML file. This can give the
+        # impression that the product is healthier than it really is. As a
+        # workaround, we can log the crash ourselves and re-run the tests while
+        # skipping the crashing tests.
+
         if log_device_placement:
           output_lines = test_output.splitlines()
           csv_lines = []
