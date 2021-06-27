@@ -25,6 +25,12 @@ limitations under the License.
 #include "tensorflow/core/kernels/dml_ops_common.h"
 #include "tensorflow/core/platform/test.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <unistd.h>
+#endif
+
 using Microsoft::WRL::ComPtr;
 
 namespace tensorflow {
@@ -280,6 +286,7 @@ TEST_F(DmlKernelManagerTest, QueueReference) {
   // fence = 1
   // kernel1 should be released
   DML_CHECK_SUCCEEDED(fence->Signal(1));
+  sleep(10);
   kernel_manager_.ReleaseCompletedReferences();
   EXPECT_TRUE(kernel1_weak.expired());
   EXPECT_TRUE(!kernel2_weak.expired());
@@ -287,6 +294,7 @@ TEST_F(DmlKernelManagerTest, QueueReference) {
   // fence = 2
   // Both kernels should be released
   DML_CHECK_SUCCEEDED(fence->Signal(2));
+  sleep(10);
   kernel_manager_.ReleaseCompletedReferences();
   EXPECT_TRUE(kernel1_weak.expired());
   EXPECT_TRUE(kernel2_weak.expired());
