@@ -98,11 +98,11 @@ void DmlKernelManager::ReleaseCompletedReferences() const {
     printf("Visiting kernel%d\n", i);
 
     if (it->gpu_event.IsSignaled()) {
-      printf("kernel%d is signaled", i);
+      printf("kernel%d is signaled\n", i);
       // Move this reference into references_to_free
       references_to_free.push_back(std::move(*it));
     } else {
-      printf("kernel%d is not signaled", i);
+      printf("kernel%d is not signaled\n", i);
       // Compact the queued_references_ vector
       if (it != dst) {
         *dst = std::move(*it);
