@@ -24,7 +24,13 @@ struct DmlGpuEvent {
   uint64_t fence_value;
   Microsoft::WRL::ComPtr<ID3D12Fence> fence;
 
-  bool IsSignaled() const { return fence->GetCompletedValue() >= fence_value; }
+  bool IsSignaled() const {
+    printf(
+        "Checking IsSignaled(): fence->GetCompletedValue() = %llu, fence_value "
+        "= %llu\n",
+        fence->GetCompletedValue(), fence_value);
+    return fence->GetCompletedValue() >= fence_value;
+  }
 
   // Blocks until IsSignaled returns true.
   void WaitForSignal() const {
@@ -53,11 +59,10 @@ struct DmlGpuEvent {
         }
       }
       UniqueHandle& operator=(UniqueHandle& other) = delete;
-      UniqueHandle& operator=(UniqueHandle&& other)
-      {
-          m_handle = std::move(other.m_handle);
-          other.m_handle = nullptr;
-          return *this;
+      UniqueHandle& operator=(UniqueHandle&& other) {
+        m_handle = std::move(other.m_handle);
+        other.m_handle = nullptr;
+        return *this;
       }
       HANDLE get() { return m_handle; }
       operator bool() const { return m_handle; }
@@ -78,9 +83,9 @@ struct DmlGpuEvent {
 #else
     // Nullptr event blocks CPU until completion (creates and waits on an event
     // internally).  This API returns an error on WSL if the fence value
-    // is not reached after 10 seconds (although this may be changed in future versions 
-    // of the WSL kernel). To work around this, failing calls are re-issued
-    // if they took a minimum length of time (arbitrarily, 1 second). 
+    // is not reached after 10 seconds (although this may be changed in future
+    // versions of the WSL kernel). To work around this, failing calls are
+    // re-issued if they took a minimum length of time (arbitrarily, 1 second).
     while (true) {
       auto start_time = std::chrono::high_resolution_clock::now();
       HRESULT hr = fence->SetEventOnCompletion(fence_value, nullptr);
@@ -93,7 +98,7 @@ struct DmlGpuEvent {
       if (wait_seconds.count() < 1.0) {
         DML_CHECK_SUCCEEDED(hr);
       }
-  }
+    }
 #endif
   }
 };

@@ -93,17 +93,23 @@ void DmlKernelManager::ReleaseCompletedReferences() const {
   // remaining valid objects are at the beginning of the vector. The invalid,
   // moved-from objects at the end are then erase()'d after the loop.
   auto dst = queued_references_.begin();
+  int i = 1;
   for (auto it = dst; it != queued_references_.end(); ++it) {
+    printf("Visiting kernel%d\n", i);
+
     if (it->gpu_event.IsSignaled()) {
+      printf("kernel%d is signaled", i);
       // Move this reference into references_to_free
       references_to_free.push_back(std::move(*it));
     } else {
+      printf("kernel%d is not signaled", i);
       // Compact the queued_references_ vector
       if (it != dst) {
         *dst = std::move(*it);
       }
       ++dst;
     }
+    ++i;
   }
 
   queued_references_.erase(dst, queued_references_.end());
